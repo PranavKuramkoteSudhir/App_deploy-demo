@@ -1,21 +1,17 @@
-FROM nginx:alpine
+FROM jenkins/jenkins:lts
 
-# Copy the static content to Nginx's default serving directory
-COPY index.html /usr/share/nginx/html/
+USER root
 
-# Expose port 3000 to match our configuration
-EXPOSE 3000
+# Install Docker
+RUN apt-get update && \
+    apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
+    apt-get update && \
+    apt-get -y install docker-ce-cli
 
-# Configure nginx to listen on port 3000
-RUN echo 'server { \
-    listen 3000; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html; \
-    } \
-    location /health { \
-        access_log off; \
-        add_header Content-Type text/plain; \
-        return 200 "OK"; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# Install Docker Compose
+RUN curl -L "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+
+USER jenkins
