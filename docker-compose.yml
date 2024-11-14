@@ -1,0 +1,99 @@
+services:
+
+  jenkins:
+
+    image: jenkins/jenkins:lts
+
+    container_name: jenkins
+
+    privileged: true
+
+    user: root
+
+    ports:
+
+      - "8080:8080"
+
+      - "50000:50000"
+
+    volumes:
+
+      - jenkins_home:/var/jenkins_home
+
+      - ./jenkins-config/init.groovy.d:/var/jenkins_home/init.groovy.d
+
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    networks:
+
+      - cicd_network
+
+    restart: unless-stopped
+
+
+
+  nginx:
+
+    image: nginx:latest
+
+    container_name: nginx
+
+    ports:
+
+      - "80:80"
+
+      - "443:443"
+
+    volumes:
+
+      - ./nginx/conf.d:/etc/nginx/conf.d
+
+      - nginx_logs:/var/log/nginx
+
+    networks:
+
+      - cicd_network
+
+    restart: unless-stopped
+
+
+
+  portainer:
+
+    image: portainer/portainer-ce:latest
+
+    container_name: portainer
+
+    ports:
+
+      - "9000:9000"
+
+    volumes:
+
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      - portainer_data:/data
+
+    networks:
+
+      - cicd_network
+
+    restart: unless-stopped
+
+
+
+networks:
+
+  cicd_network:
+
+    driver: bridge
+
+
+
+volumes:
+
+  jenkins_home:
+
+  nginx_logs:
+
+  portainer_data:
