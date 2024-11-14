@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CICD Demo Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-top: 40px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .server-info {
+            color: #666;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: #4CAF50;
+            color: white;
+            font-size: 14px;
+        }
+        .counter-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .counter {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .build-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="build-info">
+        Build: <span id="buildNumber">1</span>
+    </div>
+
+    <div class="container">
+        <h1>CICD Demo Portal</h1>
+        
+        <div class="info">
+            <p>This app demonstrates:</p>
+            <ul>
+                <li>Jenkins Pipeline Deployment</li>
+                <li>Docker Containerization</li>
+                <li>Nginx Load Balancing</li>
+                <li>Automated CICD Process</li>
+            </ul>
+        </div>
+
+        <div class="counter-section">
+            <h2>Interactive Counter</h2>
+            <div class="counter" id="counter">0</div>
+            <button onclick="incrementCounter()">Increment</button>
+            <button onclick="resetCounter()">Reset</button>
+        </div>
+
+        <div class="server-info">
+            Status: <span class="status" id="status">Active</span>
+            <p>Server Time: <span id="server-time"></span></p>
+            <p>Page Load Time: <span id="load-time"></span></p>
+            <p>Container: <span id="container-info">...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Counter functionality
+        let count = 0;
+        const counterElement = document.getElementById('counter');
+
+        function incrementCounter() {
+            count++;
+            counterElement.textContent = count;
+        }
+
+        function resetCounter() {
+            count = 0;
+            counterElement.textContent = count;
+        }
+
+        // Time display
+        function updateTime() {
+            const timeElement = document.getElementById('server-time');
+            timeElement.textContent = new Date().toLocaleString();
+        }
+
+        // Page load time
+        window.onload = function() {
+            const loadTime = performance.now();
+            document.getElementById('load-time').textContent = 
+                `${loadTime.toFixed(2)} ms`;
+            
+            // Get container info from URL
+            const url = window.location.href;
+            const containerInfo = url.includes(':3001') ? 'Container 1' : 
+                                url.includes(':3002') ? 'Container 2' : 
+                                'Unknown';
+            document.getElementById('container-info').textContent = containerInfo;
+            
+            // Periodic health check
+            setInterval(checkHealth, 30000);
+        };
+
+        // Health check
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const status = document.getElementById('status');
+                if (response.ok) {
+                    status.textContent = 'Active';
+                    status.style.backgroundColor = '#4CAF50';
+                } else {
+                    status.textContent = 'Issue Detected';
+                    status.style.backgroundColor = '#f44336';
+                }
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.textContent = 'Error';
+                status.style.backgroundColor = '#f44336';
+            }
+        }
+
+        // Update time every second
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
